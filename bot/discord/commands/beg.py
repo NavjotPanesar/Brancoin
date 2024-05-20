@@ -5,7 +5,7 @@ from discord.basecommand import BaseCommand
 
 
 class Beg(BaseCommand):
-    prefix = "bran pwease"
+    prefix = "bran uwu pwease gimme"
     usage = prefix
     async def process(self, ctx, message: Message, dbservice: DbService):
         if not self.does_prefix_match(self.prefix, message.content):

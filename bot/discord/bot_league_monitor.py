@@ -47,7 +47,12 @@ import traceback
 
 @inject
 class DiscordMonitorClient(commands.Bot):
-    commands = [Discover(), Coin(), Gift(), Spin(), Coins(), ViewMatches(), ViewJackpot(), AdminAddLeague(), AdminAddBroadcast(), AddVote(), ViewVotes(), Beg(), ViewShop(), Buy(), Inventory(), SelectCard(), AdminAddImage(), AdminAddCard(), OpenPack(), ViewPacks(), ViewPackCards(), ViewCard()]
+    commands = [AdminAddLeague(), AdminAddBroadcast(),ViewPackCards(), AdminAddImage(), AdminAddCard(),
+                Discover(), 
+                Coin(), Gift(), Spin(), Coins(), ViewJackpot(), Beg(),
+                ViewMatches(), ViewVotes(), AddVote(), 
+                Inventory(), ViewShop(), Buy(), ViewPacks(),
+                OpenPack(), ViewCard(), SelectCard(),]
     @inject
     def __init__(self, intents, dbservice: DbService = Provide[DbContainer.service], league_service: LeagueService = Provide[LeagueContainer.service]):
         super().__init__(intents=intents, command_prefix="b ")

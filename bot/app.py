@@ -1,4 +1,5 @@
 from datetime import datetime
+import random
 from threading import Thread
 from sqlalchemy import create_engine, select
 import discord.bot_league_monitor
@@ -32,6 +33,7 @@ container2 = DbContainer()
 container2.init_resources()
 container2.wire(modules=[__name__, webserver.web, discord.bot_league_monitor])
 
+random.seed()
 
 # main()
 
