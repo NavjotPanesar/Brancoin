@@ -15,7 +15,7 @@ class Gift(BaseCommand):
     prefix = "bran gift"
     usage = f"{prefix} [user] [num]"
     async def process(self, ctx, message: Message, dbservice: DbService):
-        if not message.content.startswith(self.prefix):
+        if not self.does_prefix_match(self.prefix, message.content):
             return
         command_breakdown = message.content.split()
         try:

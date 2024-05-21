@@ -1,5 +1,6 @@
 
 import enum
+import shlex
 from envvars import Env
 
 
@@ -14,6 +15,11 @@ class BaseCommand():
         if len(split_message) < len(split_prefix):
             return False
         for idx, segment_prefix in enumerate(split_prefix):
-            if segment_prefix != split_message[idx]:
+            if segment_prefix.lower() != split_message[idx].lower():
                 return False
         return True
+    
+    def get_arg_stack(self, prefix: str, message: str):
+        message_breakdown = shlex.split(message.content)
+        args = message_breakdown[len(prefix.split()):]
+        return args

@@ -18,7 +18,7 @@ class Spin(BaseCommand):
     usage = prefix
     freebie_chance = 1/100
     async def process(self, ctx, message: Message, dbservice: DbService):
-        if not message.content.startswith(self.prefix):
+        if not self.does_prefix_match(self.prefix, message.content):
             return
         output_msg = self.execute_spin(message, dbservice)
         await message.reply(output_msg)
@@ -32,6 +32,7 @@ class Spin(BaseCommand):
 
             if guild.broadcast_channel_id is not None and str(message.channel.id) != guild.broadcast_channel_id:
                 return ("Wrong channel, you clown :clown:")
+            
 
             coin_change = 0
 
