@@ -30,15 +30,24 @@ class Inventory(BaseCommand):
                     await message.reply("No cards")
                     return
 
-                card_pages: List[List[Card]] = self.split(cards, 12)
+                max_x = 6
+                max_y = 4
+                card_pages: List[List[Card]] = self.split(cards, max_x*max_y)
                 discord_files: List[discord.File] = []
                 for idx, card_page in enumerate(card_pages):      
-                    grid = (6,2)
-                    if len(card_page) <= 2:
-                        grid = (len(card_page), 1)
-                    else: 
+                    img_size = (1600, 1200)
+                    grid = (max_x,max_y)
+                    if len(card_page) <= max_x*1:
+                        grid = (math.ceil(len(card_page)/1), 1)
+                    elif len(card_page) <= max_x*2: 
                         grid = (math.ceil(len(card_page)/2), 2)
-                    inv_img = DrawUtils.draw_inv_card_spread(card_page,  (1600, 1200), grid, True)
+                    elif len(card_page) <= max_x*3: 
+                        grid = (math.ceil(len(card_page)/3), 3)
+                    else : 
+                        grid = (math.ceil(len(card_page)/4), 4)
+                        img_size = (1600, 1600)
+                    print(img_size)
+                    inv_img = DrawUtils.draw_inv_card_spread(card_page, img_size , grid, True)
                     buffered = BytesIO()
                     inv_img.save(buffered, format="PNG")
                     discord_files.append(discord.File(BytesIO(buffered.getvalue()), filename=f"page{idx}.png"))
