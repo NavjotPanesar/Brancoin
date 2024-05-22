@@ -18,7 +18,7 @@ from discord.basecommand import BaseCommand
 import random
 
 class OpenPack(BaseCommand):
-    prefix = "bran pack"
+    prefix = "bran buypack"
     usage = prefix + " [pack_name]"
 
     async def process(self, ctx, message: Message, dbservice: DbService):
@@ -36,6 +36,7 @@ class OpenPack(BaseCommand):
 
             if user.brancoins < pack.cost:
                 await message.reply("You broke son")
+                return
             
             drawn_card_segments = self.draw_cards_from_pack(pack)
             for drawn_card_segment in drawn_card_segments:

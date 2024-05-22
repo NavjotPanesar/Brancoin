@@ -30,6 +30,7 @@ class Buy(BaseCommand):
 
             if source.brancoins < selected_shop_item.card.cost:
                 await message.reply("You broke son")
+                return
 
             ownedcard = OwnedCard()
             ownedcard.card = selected_shop_item.card
