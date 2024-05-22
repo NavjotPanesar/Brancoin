@@ -13,7 +13,7 @@ import random
 class Spin(BaseCommand):
     cost = 2
     wins = [(1/500, 50), (1/50, 20), (1/18, 10), (1/6, 6), (1/4, 3), (3/8, 2)]
-    jackpot_chance = 1/100
+    jackpot_chance = 1/200
     prefix = "bran spin"
     usage = prefix
     freebie_chance = 1/100
