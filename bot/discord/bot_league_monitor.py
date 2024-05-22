@@ -93,6 +93,9 @@ class DiscordMonitorClient(commands.Bot):
         
         closed_game_timer = RepeatTimer(60, self.handle_finished_games)
         closed_game_timer.start()
+
+        jackpot_trickle_timer = RepeatTimer(60*60, self.jackpot_trickle)
+        jackpot_trickle_timer.start()
             
 
     def populate_users(self, guild: discord.Guild):
@@ -120,6 +123,19 @@ class DiscordMonitorClient(commands.Bot):
             else:
                 print("guild entry already exists")
 
+    def jackpot_trickle(self):
+        try:
+            print("trickle")
+            with self.db.Session() as session: 
+                guilds = session.query(Guild).all()
+                for guild in guilds:
+                    if guild.brancoins < 80:
+                        guild.brancoins += 21
+                        session.add(guild)
+                session.commit()
+        except Exception as e: 
+            print(e)
+            print(traceback.format_exc())
     
     def handle_finished_games(self):
         print("tock")
