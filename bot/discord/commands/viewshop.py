@@ -1,18 +1,18 @@
-
-
 import base64
 import datetime
 from io import BytesIO
 import os
 from PIL import Image, ImageFont, ImageDraw
+from cachetools import cached
+from cachetools.keys import hashkey
 from discord import Message
 import discord
 from sqlalchemy import func
+from discord.drawutils import DrawUtils
 from models.dbcontainer import DbService
 from models.models import Card, Shop, User
 from discord.basecommand import BaseCommand
 from discord.ext.commands import Bot
-from cardmaker import CardConstructor
 
 
 class ViewShop(BaseCommand):
@@ -41,26 +41,10 @@ class ViewShop(BaseCommand):
         (1337 + text_margin_x, text_y),
     ]
 
-    def card_to_image(self, card: Card):
-        input_data = {
-            "card": card.card_style,
-            "Title": card.title,
-            "attribute": card.attribute,
-            "Level": int(card.level),
-            "Type": card.type,
-            "Descripton": str(card.description).replace('\\n','\n'),
-            "Atk": card.atk,
-            "Def": card.defe
-            }
-        input_data["image_card"] = Image.open(BytesIO(card.image.bin))
-        output = CardConstructor(input_data)
-        output_card = output.generateCard()
-        return Image.open(BytesIO(output_card))
 
     async def process(self, ctx, message: Message, dbservice: DbService):
         if not self.does_prefix_match(self.prefix, message.content):
             return
-        
         
         with dbservice.Session() as session: 
             if session.query(Shop).filter(Shop.date_added == datetime.date.today()).count() < 4:
@@ -95,14 +79,29 @@ class ViewShop(BaseCommand):
 
                 session.commit()
 
+        
+        cards = []
         card_images = []
+        card_labels = []
         card_costs = []
         with dbservice.Session() as session: 
             shop_items = session.query(Shop).join(Card, Shop.card).filter(Shop.date_added == datetime.date.today()).order_by(Card.cost.asc(), Card.id.asc()).limit(4).all()
-            for shop_item in shop_items:
-                card_images.append(self.card_to_image(shop_item.card))
+            for idx, shop_item in enumerate(shop_items):
+                cards.append(shop_item.card)
+                card_images.append(DrawUtils.card_to_image(shop_item.card))
                 card_costs.append(shop_item.card.cost)
+                card_labels.append(f"[bran buy {idx + 1}] to buy {shop_item.card.title} {shop_item.card.card_style} for [**{shop_item.card.cost}** {self.custom_emoji}]!")
         
+        shop_image = None
+        if len(card_images) == 4:
+            shop_image = self.draw_shop_image(card_images, card_costs)
+        else: 
+            shop_image = self.draw_shop_image_flex(cards)
+        discord_shop_item = discord.File(shop_image, filename="shop.png")
+        card_label_joined = ',\n'.join(card_labels)
+        await message.reply(f"**Welcome to the Bran Shop!**\n{card_label_joined}", file=discord_shop_item)
+
+    def draw_shop_image(self, card_images, card_costs):
         shop_map = Image.open(os.path.dirname(__file__) + "/../../assets/shopmat.png")
         font = ImageFont.truetype(os.path.dirname(__file__) + "/../../assets/Jersey M54.ttf", 40)
         shop_draw = ImageDraw.Draw(shop_map)
@@ -112,7 +111,7 @@ class ViewShop(BaseCommand):
 
         buffered = BytesIO()
         shop_map.save(buffered, format="PNG")
-        discord_shop_item = discord.File(BytesIO(buffered.getvalue()), filename="shop.png")
-        await message.reply(file=discord_shop_item)
-
-        
+        return BytesIO(buffered.getvalue())
+    
+    def draw_shop_image_flex(self, cards, card_costs):
+        return DrawUtils.draw_inv_card_spread(cards, (1600/4*len(cards), 900), (len(cards), 1), False)

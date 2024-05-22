@@ -1,15 +1,21 @@
+from functools import lru_cache
 from io import BytesIO
 import os
 from typing import List
+
+from cachetools import cached
 from models.models import Card
 from PIL import Image, ImageDraw, ImageOps, ImageSequence
 from cardmaker import CardConstructor
+from cachetools.keys import hashkey
 
 
 class DrawUtils:
 
     @staticmethod
+    @cached(cache={}, key=lambda card: hashkey(card.id, card.card_style, card.title, card.attribute, card.level, card.type, card.description, card.atk, card.defe, card.cost, card.image_label))
     def card_to_byte_image(card: Card):
+        print(f"card draw {card.title}")
         input_data = {
             "card": card.card_style,
             "Title": card.title,

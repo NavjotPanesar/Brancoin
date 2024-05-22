@@ -16,8 +16,6 @@ from models.dbcontainer import DbService
 from models.models import BoosterCard, BoosterPack, BoosterSegment, Card, Guild, OwnedCard, Shop, User
 from discord.basecommand import BaseCommand
 import random
-from cardmaker import CardConstructor
-
 
 class OpenPack(BaseCommand):
     prefix = "bran pack"
