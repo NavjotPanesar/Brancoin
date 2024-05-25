@@ -11,6 +11,7 @@ from discord import Message
 import discord
 import discord.ext
 import discord.ext.commands
+from networkx import draw
 from discord.drawutils import DrawUtils
 from models.dbcontainer import DbService
 from models.models import BoosterCard, BoosterPack, BoosterSegment, Card, Guild, OwnedCard, Shop, User
@@ -68,7 +69,7 @@ class OpenPack(BaseCommand):
         discord_files: List[discord.File] = []
         for idx, card_page in enumerate(card_pages):      
             grid = (len(card_page), 1)
-            inv_img = DrawUtils.draw_inv_card_spread(card_page,  (1400, 400), grid, True, bg)
+            inv_img = DrawUtils.draw_inv_card_spread(card_page,  (1400, 400), grid, draw_blanks=True, bg=bg)
             buffered = BytesIO()
             inv_img.save(buffered, format="PNG")
             discord_files.append(discord.File(BytesIO(buffered.getvalue()), filename=f"page{idx}.png"))

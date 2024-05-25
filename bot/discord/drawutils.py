@@ -5,7 +5,7 @@ from typing import List
 
 from cachetools import LRUCache, cached
 from models.models import Card
-from PIL import Image, ImageDraw, ImageOps, ImageSequence
+from PIL import Image, ImageDraw, ImageOps, ImageSequence, ImageFont
 from cardmaker import CardConstructor
 from cachetools.keys import hashkey
 
@@ -65,7 +65,7 @@ class DrawUtils:
         return Image.open(DrawUtils.card_to_byte_image(card))
     
     @staticmethod
-    def draw_inv_card_spread(cards: List[Card], bg_size, card_grid, draw_blanks, bg = "inventorybg.jpg"):
+    def draw_inv_card_spread(cards: List[Card], bg_size, card_grid, draw_blanks, bg = "inventorybg.jpg", draw_idx = False):
         spread = Image.open(os.path.dirname(__file__) + f"/../assets/{bg}")
         spread = spread.resize(bg_size)
         
@@ -74,6 +74,8 @@ class DrawUtils:
 
         draw = ImageDraw.Draw(spread)   
         rect_size = (int(bg_size[0]/card_grid[0] - (margin_x*1.5)), int(bg_size[1]/card_grid[1] - (1.5*margin_y)))
+        
+        font = ImageFont.truetype(os.path.dirname(__file__) + "/../assets/Jersey M54.ttf", 20)
 
         card_idx = 0
         for y in range(card_grid[1]):
@@ -96,6 +98,9 @@ class DrawUtils:
                     gap_y = rect_size[1] - image_sized.size[1]
 
                     spread.paste(image_sized, (top_left_x + int(gap_x/2), top_left_y + int(gap_y/2)))
+                    
+                    if draw_idx:
+                        draw.text(xy = (top_left_x + int(gap_x/2) - margin_x, top_left_y + int(gap_y/2)- margin_y) , text=str(card_idx), fill=(255, 255, 255), font=font)
                 card_idx += 1
 
         return spread

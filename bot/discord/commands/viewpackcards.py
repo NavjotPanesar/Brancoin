@@ -44,7 +44,7 @@ class ViewPackCards(BaseCommand):
                     print_cards.append(card.card)
 
             grid = (math.ceil(math.sqrt(len(print_cards))), math.ceil(math.sqrt(len(print_cards))))
-            inv_img = DrawUtils.draw_inv_card_spread(print_cards,  (1000, 1000), grid, True)
+            inv_img = DrawUtils.draw_inv_card_spread(print_cards,  (1000, 1000), grid, draw_blanks=True)
             buffered = BytesIO()
             inv_img.save(buffered, format="PNG")
             discord_file = discord.File(BytesIO(buffered.getvalue()), filename=f"previewpack.png")

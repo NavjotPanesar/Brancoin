@@ -116,7 +116,7 @@ class ViewShop(BaseCommand):
         return BytesIO(buffered.getvalue())
     
     def draw_shop_image_flex(self, cards):
-        shop_map = DrawUtils.draw_inv_card_spread(cards, (math.floor(1600/4*len(cards)), 900), (len(cards), 1), False)
+        shop_map = DrawUtils.draw_inv_card_spread(cards, (math.floor(1600/4*len(cards)), 900), (len(cards), 1))
         buffered = BytesIO()
         shop_map.save(buffered, format="PNG")
         return BytesIO(buffered.getvalue())
