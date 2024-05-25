@@ -100,7 +100,7 @@ class DrawUtils:
                     spread.paste(image_sized, (top_left_x + int(gap_x/2), top_left_y + int(gap_y/2)))
                     
                     if draw_idx:
-                        draw.text(xy = (top_left_x + int(gap_x/2) - margin_x, top_left_y + int(gap_y/2)- margin_y) , text=str(card_idx), fill=(255, 255, 255), font=font)
+                        draw.text(xy = (top_left_x + int(gap_x/2) - margin_x, top_left_y + int(gap_y/2)- margin_y) , text=str(card_idx + 1), fill=(255, 255, 255), font=font)
                 card_idx += 1
 
         return spread
