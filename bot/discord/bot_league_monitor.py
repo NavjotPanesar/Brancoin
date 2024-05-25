@@ -43,15 +43,9 @@ from envvars import Env
 from discord.ext import commands
 import traceback
 
-
 @inject
 class DiscordMonitorClient(commands.Bot):
-    commands = [AdminAddLeague(), AdminAddBroadcast(),ViewPackCards(), AdminAddImage(), AdminAddCard(),
-                Discover(), 
-                Coin(), Gift(), Spin(), Coins(), ViewJackpot(), Beg(),
-                ViewMatches(), AddVote(), 
-                Inventory(), ViewShop(), Buy(),
-                OpenPack(), ViewCard(), SelectCard(), DeleteCard()]
+    commands = []
     @inject
     def __init__(self, intents, dbservice: DbService = Provide[DbContainer.service], league_service: LeagueService = Provide[LeagueContainer.service]):
         super().__init__(intents=intents, command_prefix="b ")
@@ -95,7 +89,13 @@ class DiscordMonitorClient(commands.Bot):
 
         jackpot_trickle_timer = RepeatTimer(60*60, self.jackpot_trickle)
         jackpot_trickle_timer.start()
-            
+
+        self.commands = [AdminAddLeague(), AdminAddBroadcast(),ViewPackCards(), AdminAddImage(), AdminAddCard(),
+                Discover(), 
+                Coin(), Gift(), Coins(), ViewJackpot(), Beg(), Spin(loop=self.loop, dbservice=self.db, ctx=self.get_context),
+                ViewMatches(), AddVote(), 
+                Inventory(), ViewShop(), Buy(),
+                OpenPack(), ViewCard(), SelectCard(), DeleteCard()]
 
     def populate_users(self, guild: discord.Guild):
         with self.db.Session() as session:

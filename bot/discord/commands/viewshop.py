@@ -1,6 +1,7 @@
 import base64
 import datetime
 from io import BytesIO
+import math
 import os
 from PIL import Image, ImageFont, ImageDraw
 from cachetools import cached
@@ -85,7 +86,7 @@ class ViewShop(BaseCommand):
         card_labels = []
         card_costs = []
         with dbservice.Session() as session: 
-            shop_items = session.query(Shop).join(Card, Shop.card).filter(Shop.date_added == datetime.date.today()).order_by(Card.cost.asc(), Card.id.asc()).limit(4).all()
+            shop_items = session.query(Shop).join(Card, Shop.card).filter(Shop.date_added == datetime.date.today()).order_by(Card.cost.asc(), Card.id.asc()).all()
             for idx, shop_item in enumerate(shop_items):
                 cards.append(shop_item.card)
                 card_images.append(DrawUtils.card_to_image(shop_item.card))
@@ -114,8 +115,11 @@ class ViewShop(BaseCommand):
         shop_map.save(buffered, format="PNG")
         return BytesIO(buffered.getvalue())
     
-    def draw_shop_image_flex(self, cards, card_costs):
-        return DrawUtils.draw_inv_card_spread(cards, (1600/4*len(cards), 900), (len(cards), 1), False)
+    def draw_shop_image_flex(self, cards):
+        shop_map = DrawUtils.draw_inv_card_spread(cards, (math.floor(1600/4*len(cards)), 900), (len(cards), 1), False)
+        buffered = BytesIO()
+        shop_map.save(buffered, format="PNG")
+        return BytesIO(buffered.getvalue())
     
     async def show_pack_shop(self, dbservice: DbService, message: discord.Message):
         with dbservice.Session() as session:
