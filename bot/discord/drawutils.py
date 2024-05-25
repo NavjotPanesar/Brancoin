@@ -65,7 +65,7 @@ class DrawUtils:
         return Image.open(DrawUtils.card_to_byte_image(card))
     
     @staticmethod
-    def draw_inv_card_spread(cards: List[Card], bg_size, card_grid, draw_blanks, bg = "inventorybg.jpg", draw_idx = False):
+    def draw_inv_card_spread(cards: List[Card], bg_size, card_grid, draw_blanks, bg = "inventorybg.jpg", draw_idx = False, idx_offset = 1):
         spread = Image.open(os.path.dirname(__file__) + f"/../assets/{bg}")
         spread = spread.resize(bg_size)
         
@@ -100,7 +100,7 @@ class DrawUtils:
                     spread.paste(image_sized, (top_left_x + int(gap_x/2), top_left_y + int(gap_y/2)))
                     
                     if draw_idx:
-                        draw.text(xy = (top_left_x + int(gap_x/2) - margin_x, top_left_y + int(gap_y/2)- margin_y) , text=str(card_idx + 1), fill=(255, 255, 255), font=font)
+                        draw.text(xy = (top_left_x + int(gap_x/2) - margin_x, top_left_y + int(gap_y/2)- margin_y) , text=str(card_idx + idx_offset), fill=(255, 255, 255), font=font)
                 card_idx += 1
 
         return spread

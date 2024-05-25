@@ -34,6 +34,7 @@ class Inventory(BaseCommand):
                 max_y = 4
                 card_pages: List[List[Card]] = self.split(cards, max_x*max_y)
                 discord_files: List[discord.File] = []
+                idx_counter = 1
                 for idx, card_page in enumerate(card_pages):      
                     img_size = (1600, 1200)
                     grid = (max_x,max_y)
@@ -47,10 +48,11 @@ class Inventory(BaseCommand):
                         grid = (math.ceil(len(card_page)/4), 4)
                         img_size = (1600, 1600)
                     print(img_size)
-                    inv_img = DrawUtils.draw_inv_card_spread(card_page, img_size , grid, draw_blanks=True, draw_idx=True)
+                    inv_img = DrawUtils.draw_inv_card_spread(card_page, img_size , grid, draw_blanks=True, draw_idx=True, idx_offset=idx_counter)
                     buffered = BytesIO()
                     inv_img.save(buffered, format="PNG")
                     discord_files.append(discord.File(BytesIO(buffered.getvalue()), filename=f"page{idx}.png"))
+                    idx_counter += len(card_page)
                 await message.reply(f"Inventory:", files=discord_files)
             else:
                 await message.reply("Who are you?")
