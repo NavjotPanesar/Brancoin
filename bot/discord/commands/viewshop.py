@@ -10,7 +10,7 @@ import discord
 from sqlalchemy import func
 from discord.drawutils import DrawUtils
 from models.dbcontainer import DbService
-from models.models import Card, Shop, User
+from models.models import BoosterCard, BoosterPack, Card, Shop, User
 from discord.basecommand import BaseCommand
 from discord.ext.commands import Bot
 
@@ -100,6 +100,7 @@ class ViewShop(BaseCommand):
         discord_shop_item = discord.File(shop_image, filename="shop.png")
         card_label_joined = ',\n'.join(card_labels)
         await message.reply(f"**Welcome to the Bran Shop!**\n{card_label_joined}", file=discord_shop_item)
+        await self.show_pack_shop(dbservice, message)
 
     def draw_shop_image(self, card_images, card_costs):
         shop_map = Image.open(os.path.dirname(__file__) + "/../../assets/shopmat.png")
@@ -115,3 +116,31 @@ class ViewShop(BaseCommand):
     
     def draw_shop_image_flex(self, cards, card_costs):
         return DrawUtils.draw_inv_card_spread(cards, (1600/4*len(cards), 900), (len(cards), 1), False)
+    
+    async def show_pack_shop(self, dbservice: DbService, message: discord.Message):
+        with dbservice.Session() as session:
+            packs = session.query(BoosterPack).all()
+            if packs is None or len(packs) == 0:
+                await message.reply("can't find any packs")
+                return
+            
+            source = session.query(User).filter(User.user_id == str(message.author.id), User.guild_id == str(message.guild.id)).first()
+            owned_card_ids = [x.card_id for x in source.owned_cards]
+            missing_cards_text = []
+            for pack in packs:
+                distinct_cards_in_pack = session.query((func.distinct(BoosterCard.card_id))).filter(BoosterCard.booster_pack_id == pack.id).all()
+                distinct_card_ids = [x.tuple()[0] for x in distinct_cards_in_pack]
+                missing_card_ids = [x for x in distinct_card_ids if x not in owned_card_ids]
+                missing_cards_text.append(f"\nYou're missing {len(missing_card_ids)} cards from this pack!")
+
+            embed = discord.Embed(title=f"Pack Shop!", description="", color=0xccffff)
+            embed.set_author(name="Check out these boosters!", icon_url="https://i.imgur.com/L4Ps6O5.png")
+            
+            for idx, pack in enumerate(packs):
+                embed.add_field(name=f"bran buypack {str(pack.id)}", value=str(pack.desc), inline=True)
+                embed.add_field(name=f"costs {self.custom_emoji} {str(pack.cost)}", value=missing_cards_text[idx] , inline=True)
+                embed.add_field(name="", value="", inline=False)
+
+            embed.set_image(url="https://i.imgur.com/NifcNgd.jpeg")
+
+            await message.reply(embed=embed)

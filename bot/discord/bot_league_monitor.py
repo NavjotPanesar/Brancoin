@@ -14,7 +14,6 @@ import sqlalchemy
 from discord.commands.torch import DeleteCard
 from discord.commands.viewcard import ViewCard
 from discord.commands.viewpackcards import ViewPackCards
-from discord.commands.viewpacks import ViewPacks
 from discord.commands.openpack import OpenPack
 from discord.commands.addcard import AdminAddCard
 from discord.commands.addimage import AdminAddImage
@@ -24,7 +23,6 @@ from discord.commands.buy import Buy
 from discord.commands.viewshop import ViewShop
 from discord.commands.beg import Beg
 from discord.commands.vote import AddVote
-from discord.commands.viewvotes import ViewVotes
 from discord.VoteType import VoteType
 from discord.commands.addbroadcast import AdminAddBroadcast
 from discord.repeattimer import RepeatTimer
@@ -51,8 +49,8 @@ class DiscordMonitorClient(commands.Bot):
     commands = [AdminAddLeague(), AdminAddBroadcast(),ViewPackCards(), AdminAddImage(), AdminAddCard(),
                 Discover(), 
                 Coin(), Gift(), Spin(), Coins(), ViewJackpot(), Beg(),
-                ViewMatches(), ViewVotes(), AddVote(), 
-                Inventory(), ViewShop(), Buy(), ViewPacks(),
+                ViewMatches(), AddVote(), 
+                Inventory(), ViewShop(), Buy(),
                 OpenPack(), ViewCard(), SelectCard(), DeleteCard()]
     @inject
     def __init__(self, intents, dbservice: DbService = Provide[DbContainer.service], league_service: LeagueService = Provide[LeagueContainer.service]):

@@ -28,9 +28,9 @@ class DeleteCard(BaseCommand):
                 owned_card = guy.owned_cards[card_idx]
                 value = owned_card.card.cost
                 title = owned_card.card.title
-                guy.brancoins += math.ceil(value/5)
+                guy.brancoins += math.ceil(value/8)
                 session.query(OwnedCard).filter(OwnedCard.id == owned_card.id).delete()
                 session.commit()
-                await message.reply(f"{title} has been sent to the shadow realm!!! {math.ceil(value/5)}{self.custom_emoji} restored. \n**card inventory indexes have changed, be careful when deleting in a chain**")
+                await message.reply(f"{title} has been sent to the shadow realm!!! {math.ceil(value/8)}{self.custom_emoji} restored. \n**card inventory indexes have changed, be careful when deleting in a chain**")
             else:
                 await message.reply("???")

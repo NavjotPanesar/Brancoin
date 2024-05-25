@@ -12,7 +12,7 @@ from discord.basecommand import BaseCommand
 
 class AddVote(BaseCommand):
     prefix = "bran vote"
-    usage = f"{prefix} [win] [num_coins] [optional: match_id]\n {prefix} [lose] [num_coins] [optional: match_id]"
+    usage = f"{prefix} [win/lose] [num_coins] [optional: match_id]"
     async def process(self, ctx, message: Message, dbservice: DbService):
         if not self.does_prefix_match(self.prefix, message.content):
             return
