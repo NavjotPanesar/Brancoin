@@ -1,5 +1,10 @@
 
 
+from ast import Tuple
+from asyncio import AbstractEventLoop
+import asyncio
+import itertools
+from typing import List
 from discord import Message
 import discord
 import discord.ext
@@ -9,6 +14,10 @@ from models.models import Guild, User
 from discord.basecommand import BaseCommand
 import random
 
+import reactivex as rx
+from reactivex import operators as ops
+from reactivex.scheduler import ThreadPoolScheduler
+
 
 class Spin(BaseCommand):
     cost = 2
@@ -17,27 +26,62 @@ class Spin(BaseCommand):
     prefix = "bran spin"
     usage = prefix
     freebie_chance = 1/100
+
+    spin_event_stream = rx.Subject()
+
+    def __init__(self, loop, ctx, dbservice: DbService):
+        self.dbservice = dbservice
+        self.loop = loop
+
+        
+        scheduler = ThreadPoolScheduler(1)
+        self.spin_event_stream.pipe(
+            ops.buffer_with_time(1.0)
+        ).subscribe(
+            on_next=self.process_spin_buff,
+            on_error=print,
+            on_completed=lambda: print("Done!"),
+            scheduler=scheduler
+        )
+    
+    def process_spin_buff(self, buff: List[discord.Message]):
+        for channel_id, messages in itertools.groupby(buff, lambda x: x.channel.id):
+            output_strs = []
+            channel = None
+            for message in list(messages):
+                output_strs.append(self.execute_spin(message))
+                channel = message.channel
+            if channel:
+                asyncio.run_coroutine_threadsafe(self.output_spin_results(channel, '\n------\n'.join(output_strs)), self.loop)
+
+    async def output_spin_results(self, channel: discord.TextChannel, message: str):
+        await channel.send(message)
+
     async def process(self, ctx, message: Message, dbservice: DbService):
         if not self.does_prefix_match(self.prefix, message.content):
             return
-        output_msg = self.execute_spin(message, dbservice)
-        await message.reply(output_msg)
         
-    def execute_spin(self, message: Message, dbservice: DbService):
+        # add it to the stream and get on with our day
+        self.spin_event_stream.on_next(message)
+
+        # spin in realtime, disabled
+        # output_msg = self.execute_spin(message, dbservice)
+        # await message.reply(output_msg)
+        
+    def execute_spin(self, message: Message):
         output_msg = ""
-        with dbservice.Session() as session: 
+        with self.dbservice.Session() as session: 
             is_freebie = True if random.uniform(0, 1) < self.freebie_chance else False
             source = session.query(User).filter(User.user_id == str(message.author.id), User.guild_id == str(message.guild.id)).first()
             guild = session.query(Guild).filter(Guild.guild_id == str(message.guild.id)).first()
 
             if guild.broadcast_channel_id is not None and str(message.channel.id) != guild.broadcast_channel_id:
-                return ("Wrong channel, you clown :clown:")
-            
+                return (f"<@{message.author.id}> Wrong channel, you clown :clown:")
 
             coin_change = 0
 
             if source.brancoins < self.cost:
-                return ("You ain't got the facilities for that big man")
+                return (f"<@{message.author.id}> You ain't got the facilities for that big man")
 
             if not is_freebie:
                 coin_change -= self.cost
@@ -61,18 +105,18 @@ class Spin(BaseCommand):
             source.brancoins += coin_change
 
             if won_jackpot:
-                output_msg = (f":rotating_light: :rotating_light: :rotating_light: YOU WON THE JACKPOT OF {jackpot_value} {self.custom_emoji} !!!   :rotating_light: :rotating_light: :rotating_light: ")
+                output_msg = (f"<@{message.author.id}> :rotating_light: :rotating_light: :rotating_light: YOU WON THE JACKPOT OF {jackpot_value} {self.custom_emoji} !!!   :rotating_light: :rotating_light: :rotating_light: ")
             else:
                 if not is_freebie:
                     if win_val == 0:
-                        output_msg = (f"Paid {self.cost} {self.custom_emoji} ...\nWon nothing... dummy... :clown:")
+                        output_msg = (f"<@{message.author.id}> Paid {self.cost} {self.custom_emoji} ...\nWon nothing... dummy... :clown:")
                     else:
-                        output_msg = (f"Paid {self.cost} {self.custom_emoji} ...\nWon {win_val}!!!!:maracas:")
+                        output_msg = (f"<@{message.author.id}> Paid {self.cost} {self.custom_emoji} ...\nWon {win_val}!!!!:maracas:")
                 else:
                     if win_val == 0:
-                        output_msg = (f"Paid nothing!!! Fames Jermo has blessed you! ...\nWon nothing... it looks like this blessing is a toxic curse... :cursed:")
+                        output_msg = (f"<@{message.author.id}> Paid nothing!!! Fames Jermo has blessed you! ...\nWon nothing... it looks like this blessing is a toxic curse... :cursed:")
                     else:
-                        output_msg = (f"Paid nothing!!! Farhan smiles upon you!!\nWon {win_val}!!!! Time to convert!!!!:maracas: <:Prayge:1038601127052193814> :maracas:")
+                        output_msg = (f"<@{message.author.id}> Paid nothing!!! Farhan smiles upon you!!\nWon {win_val}!!!! Time to convert!!!!:maracas: <:Prayge:1038601127052193814> :maracas:")
 
             session.add(guild)
             session.add(source)
