@@ -39,7 +39,7 @@ class AddVote(BaseCommand):
             return
 
         with db.Session() as session:
-            source_user = session.query(User).filter(User.user_id == str(message.author.id)).first()
+            source_user = session.query(User).filter(User.user_id == str(message.author.id), User.guild_id == str(message.guild.id)).first()
             if source_user.brancoins < num_coins:
                 await message.reply("Stop doing gamba broke boi")
                 return
