@@ -11,7 +11,6 @@ from discord import Message
 import discord
 import discord.ext
 import discord.ext.commands
-from networkx import draw
 from discord.drawutils import DrawUtils
 from models.dbcontainer import DbService
 from models.models import BoosterCard, BoosterPack, BoosterSegment, Card, Guild, OwnedCard, Shop, User
