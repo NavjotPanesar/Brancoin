@@ -11,6 +11,7 @@ import discord.ext
 import discord.ext.commands
 import sqlalchemy
 
+from discord.commands.torchdupes import DeleteDupeCards
 from discord.commands.torch import DeleteCard
 from discord.commands.viewcard import ViewCard
 from discord.commands.viewpackcards import ViewPackCards
@@ -95,7 +96,7 @@ class DiscordMonitorClient(commands.Bot):
                 Coin(), Gift(), Coins(), ViewJackpot(), Beg(), Spin(loop=self.loop, dbservice=self.db, ctx=self.get_context),
                 ViewMatches(), AddVote(), 
                 Inventory(), ViewShop(), Buy(),
-                OpenPack(), ViewCard(), SelectCard(), DeleteCard()]
+                OpenPack(), ViewCard(), SelectCard(), DeleteCard(), DeleteDupeCards()]
 
     def populate_users(self, guild: discord.Guild):
         with self.db.Session() as session:
@@ -129,7 +130,7 @@ class DiscordMonitorClient(commands.Bot):
                 guilds = session.query(Guild).all()
                 for guild in guilds:
                     if guild.brancoins < 80:
-                        guild.brancoins += 21
+                        guild.brancoins += 22
                         session.add(guild)
                 session.commit()
         except Exception as e: 
