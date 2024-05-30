@@ -16,6 +16,13 @@ class DrawUtils:
     @cached(cache=LRUCache(maxsize=50), key=lambda card: hashkey(card.id, card.card_style, card.title, card.attribute, card.level, card.type, card.description, card.atk, card.defe, card.cost, card.image_label))
     def card_to_byte_image_internal(card: Card):
         print(f"card draw {card.title}")
+        addons = []
+        if card.cost > 400:
+            addons.append("foil_txt")
+        elif card.cost > 300:
+            addons.append("guild_txt")
+        if card.cost > 500:
+            addons.append("foil_pic")
         input_data = {
             "card": card.card_style,
             "Title": card.title,
@@ -24,7 +31,8 @@ class DrawUtils:
             "Type": card.type,
             "Descripton": str(card.description).replace('\\n','\n'),
             "Atk": card.atk,
-            "Def": card.defe
+            "Def": card.defe,
+            "Addons": addons
             }
         input_data["image_card"] = Image.open(BytesIO(card.image.bin))
         output = CardConstructor(input_data)
