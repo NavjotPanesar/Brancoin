@@ -97,7 +97,7 @@ class ViewShop(BaseCommand):
         if len(card_images) == 4:
             shop_image = self.draw_shop_image(card_images, card_costs)
         else: 
-            shop_image = self.draw_shop_image_flex(cards)
+            shop_image = await self.draw_shop_image_flex(cards)
         discord_shop_item = discord.File(shop_image, filename="shop.png")
         card_label_joined = ',\n'.join(card_labels)
         await message.reply(f"**Welcome to the Bran Shop!**\n{card_label_joined}", file=discord_shop_item)
@@ -115,8 +115,8 @@ class ViewShop(BaseCommand):
         shop_map.save(buffered, format="PNG")
         return BytesIO(buffered.getvalue())
     
-    def draw_shop_image_flex(self, cards):
-        shop_map = DrawUtils.draw_inv_card_spread(cards, (math.floor(1600/4*len(cards)), 900), (len(cards), 1), draw_blanks=False)
+    async def draw_shop_image_flex(self, cards):
+        shop_map = await DrawUtils.draw_inv_card_spread(cards, (math.floor(1600/4*len(cards)), 900), (len(cards), 1), draw_blanks=False)
         buffered = BytesIO()
         shop_map.save(buffered, format="PNG")
         return BytesIO(buffered.getvalue())

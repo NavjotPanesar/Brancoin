@@ -48,7 +48,7 @@ class Inventory(BaseCommand):
                         grid = (math.ceil(len(card_page)/4), 4)
                         img_size = (1600, 1600)
                     print(img_size)
-                    inv_img = DrawUtils.draw_inv_card_spread(card_page, img_size , grid, draw_blanks=True, draw_idx=True, idx_offset=idx_counter)
+                    inv_img = await DrawUtils.draw_inv_card_spread(card_page, img_size , grid, draw_blanks=True, draw_idx=True, idx_offset=idx_counter)
                     buffered = BytesIO()
                     inv_img.save(buffered, format="PNG")
                     discord_files.append(discord.File(BytesIO(buffered.getvalue()), filename=f"page{idx}.png"))

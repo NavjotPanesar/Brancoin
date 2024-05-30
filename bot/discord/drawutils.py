@@ -1,4 +1,5 @@
-from functools import lru_cache
+import asyncio
+from functools import lru_cache, partial, wraps
 from io import BytesIO
 import os
 from typing import List
@@ -11,6 +12,15 @@ from cachetools.keys import hashkey
 
 
 class DrawUtils:
+
+    def to_async(func):
+        @wraps(func)  # Makes sure that function is returned for e.g. func.__name__ etc.
+        async def run(*args, loop=None, executor=None, **kwargs):
+            if loop is None:
+                loop = asyncio.get_event_loop() # Make event loop of nothing exists
+            pfunc = partial(func, *args, **kwargs)  # Return function with variables (event) filled in
+            return await loop.run_in_executor(executor, pfunc)
+        return run
 
     @staticmethod
     @cached(cache=LRUCache(maxsize=50), key=lambda card: hashkey(card.id, card.card_style, card.title, card.attribute, card.level, card.type, card.description, card.atk, card.defe, card.cost, card.image_label))
@@ -72,6 +82,7 @@ class DrawUtils:
     def card_to_image(card: Card):
         return Image.open(DrawUtils.card_to_byte_image(card))
     
+    @to_async
     @staticmethod
     def draw_inv_card_spread(cards: List[Card], bg_size, card_grid, draw_blanks, bg = "inventorybg.jpg", draw_idx = False, idx_offset = 1):
         spread = Image.open(os.path.dirname(__file__) + f"/../assets/{bg}")

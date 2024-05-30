@@ -53,22 +53,22 @@ class OpenPack(BaseCommand):
             
             await message.reply(f"Opening a {pack_name} pack!")
             for drawn_card_segment in drawn_card_segments:
-                files = self.display_segment(drawn_card_segment[0], drawn_card_segment[1])
+                files = await self.display_segment(drawn_card_segment[0], drawn_card_segment[1])
                 await asyncio.sleep(3)
                 await message.reply(f"Looks like we have some {drawn_card_segment[0].id} cards...", files=files)
 
             await message.reply(f"Congrats on the new cards!")
 
-    def display_segment(self, segment: BoosterSegment, cards: List[Card]):
+    async def display_segment(self, segment: BoosterSegment, cards: List[Card]):
         bg = "boostermat.jpeg" if segment.bg_fname == None else segment.bg_fname
-        return self.card_spread(cards, bg)
+        return await self.card_spread(cards, bg)
 
-    def card_spread(self, cards, bg):
+    async def card_spread(self, cards, bg):
         card_pages: List[List[Card]] = self.split(cards, 6)
         discord_files: List[discord.File] = []
         for idx, card_page in enumerate(card_pages):      
             grid = (len(card_page), 1)
-            inv_img = DrawUtils.draw_inv_card_spread(card_page,  (1400, 400), grid, draw_blanks=True, bg=bg)
+            inv_img = await DrawUtils.draw_inv_card_spread(card_page,  (1400, 400), grid, draw_blanks=True, bg=bg)
             buffered = BytesIO()
             inv_img.save(buffered, format="PNG")
             discord_files.append(discord.File(BytesIO(buffered.getvalue()), filename=f"page{idx}.png"))

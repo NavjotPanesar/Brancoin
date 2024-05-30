@@ -49,7 +49,7 @@ class ViewCard(BaseCommand):
             "Select ownedcards.id, cards.cost, similarity(cards.title, :str_search) as sim from ownedcards inner join cards on ownedcards.card_id = cards.id where ownedcards.owner_id = :ownerid "
             "UNION ALL "
             "Select ownedcards.id, cards.cost, similarity(cards.description, :str_search) as sim from ownedcards inner join cards on ownedcards.card_id = cards.id where ownedcards.owner_id = :ownerid "
-            "order by sim desc, cost asc ")
+            "order by sim desc, cost desc ")
         closest_owned_card = session.execute(query_text, {"ownerid": owner.id, "str_search": search_text}).first()
         owned_card = session.query(OwnedCard).join(Card, OwnedCard.card).filter(OwnedCard.id == closest_owned_card[0]).first()
         return owned_card
