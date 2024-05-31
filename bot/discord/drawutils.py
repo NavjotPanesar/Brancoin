@@ -23,7 +23,7 @@ class DrawUtils:
         return run
 
     @staticmethod
-    @cached(cache=LRUCache(maxsize=50), key=lambda card: hashkey(card.id, card.card_style, card.title, card.attribute, card.level, card.type, card.description, card.atk, card.defe, card.cost, card.image_label))
+    @cached(cache=LRUCache(maxsize=150), key=lambda card: hashkey(card.id, card.card_style, card.title, card.attribute, card.level, card.type, card.description, card.atk, card.defe, card.cost, card.image_label))
     def card_to_byte_image_internal(card: Card):
         print(f"card draw {card.title}")
         addons = []
