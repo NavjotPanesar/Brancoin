@@ -136,9 +136,20 @@ class Card(Base):
     image: Mapped["Image"] = relationship()
     shoppable: Mapped[bool] = mapped_column(server_default="t")
     featured: Mapped[bool] = mapped_column(server_default="f")
+    bonuses: Mapped[List["CardBonus"]] = relationship()
 
     def __repr__(self) -> str:
         return f"Card(title={self.title!r}"
+    
+class CardBonus(Base):
+    __tablename__ = "cardbonuses"
+    id = mapped_column(Integer, primary_key=True, autoincrement=True, unique=True)
+    card_id: Mapped[Integer] = mapped_column(ForeignKey("cards.id"))
+    bonus_type: Mapped[int]
+
+    def __repr__(self) -> str:
+        return f"CardBonus(id={self.id!r}, card_id={self.card_id!r}, bonus_type={self.bonus_type!r})"
+
     
 class Shop(Base):
     __tablename__ = "shop"

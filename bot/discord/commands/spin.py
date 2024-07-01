@@ -9,8 +9,9 @@ from discord import Message
 import discord
 import discord.ext
 import discord.ext.commands
+from discord.CardBonusType import CardBonusType
 from models.dbcontainer import DbService
-from models.models import Guild, User
+from models.models import Card, CardBonus, Guild, OwnedCard, User
 from discord.basecommand import BaseCommand
 import random
 
@@ -32,7 +33,6 @@ class Spin(BaseCommand):
     def __init__(self, loop, ctx, dbservice: DbService):
         self.dbservice = dbservice
         self.loop = loop
-
         
         scheduler = ThreadPoolScheduler(1)
         self.spin_event_stream.pipe(
@@ -40,7 +40,7 @@ class Spin(BaseCommand):
         ).subscribe(
             on_next=self.process_spin_buff,
             on_error=print,
-            on_completed=lambda: print("Done!"),
+            on_completed=lambda: print("Completed!"),
             scheduler=scheduler
         )
     
@@ -49,13 +49,22 @@ class Spin(BaseCommand):
             output_strs = []
             channel = None
             for message in list(messages):
-                output_strs.append(self.execute_spin(message))
+                num_rolls = self.num_rolls_to_do(self.dbservice, message.author.id)
+                for x in range(num_rolls):
+                    output_strs.append(self.execute_spin(message))
                 channel = message.channel
             if channel:
                 asyncio.run_coroutine_threadsafe(self.output_spin_results(channel, '\n------\n'.join(output_strs)), self.loop)
 
     async def output_spin_results(self, channel: discord.TextChannel, message: str):
         await channel.send(message)
+
+    def num_rolls_to_do(self, dbservice: DbService, author_id: int):
+        with dbservice.Session() as session: 
+            has_bonus_roll = session.query(CardBonus).filter(CardBonus.bonus_type == CardBonusType.SPIN_2X.value).join(Card).join(OwnedCard).join(User).filter(User.user_id == str(author_id)).count() > 0
+            if has_bonus_roll:
+                return 2
+        return 1
 
     async def process(self, ctx, message: Message, dbservice: DbService):
         if not self.does_prefix_match(self.prefix, message.content):

@@ -34,7 +34,7 @@ class DeleteDupeCards(BaseCommand):
                     "INNER JOIN " 
                     "ownedcards "
                     "on ownedcards.card_id = dupes_to_keep.card_id "
-                    "where ownedcards.id > dupes_to_keep.saved_id AND owner_id=:ownerid "
+                    "where ownedcards.id > dupes_to_keep.saved_id AND owner_id=:ownerid limit 10"
                 )
                 dupe_owned_card_ids = session.execute(query_text, {"ownerid": guy.id}).scalars()
                 outputs = []

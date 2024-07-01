@@ -74,14 +74,7 @@ class DiscordMonitorClient(commands.Bot):
                     output = output + f"\n {command.usage}"
         await message.reply(output)
 
-    # async def setup_hook(self) -> None:
-    #     # create the background task and run it in the background
-    #     # self.bg_task = self.loop.create_task(self.my_background_task())
-
-    async def on_ready(self):
-        for guild in self.guilds:
-            self.create_guild(guild)
-            self.populate_users(guild)
+    async def setup_hook(self) -> None:
         open_game_timer = RepeatTimer(30, self.look_for_open_games)
         open_game_timer.start()
         
@@ -97,6 +90,11 @@ class DiscordMonitorClient(commands.Bot):
                 ViewMatches(), AddVote(), 
                 Inventory(), ViewShop(), Buy(),
                 OpenPack(), ViewCard(), SelectCard(), DeleteCard(), DeleteDupeCards()]
+
+    async def on_ready(self):
+        for guild in self.guilds:
+            self.create_guild(guild)
+            self.populate_users(guild)
 
     def populate_users(self, guild: discord.Guild):
         with self.db.Session() as session:
