@@ -64,10 +64,10 @@ class ViewShop(BaseCommand):
                 cards_to_add = []
                 for featuredCard in featured_cards:
                     cards_to_add.append(featuredCard)
-                while len(cards_to_add) < 4:
+                while len(cards_to_add) < 6:
                     newShopCard = Shop()
                     cards_to_add.append(filtered_drawn_cards.pop(0))
-                while len(cards_to_add) < 4:
+                while len(cards_to_add) < 6:
                     cards_to_add.append(cards_to_add[0])
 
                 for card_to_add in cards_to_add:

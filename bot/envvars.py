@@ -13,3 +13,6 @@ class Env():
     league_token = os.environ['LEAGUE_TOKEN']
     web_port = os.environ['WEB_PORT']
     active_discord_token = discord_token if is_debug == "false" else discord_token_debug
+
+    pushover_token = os.environ['PUSHOVER_TOKEN']
+    pushover_user = os.environ['PUSHOVER_USER']

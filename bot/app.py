@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, time
 import random
 from threading import Thread
 from sqlalchemy import create_engine, select
@@ -11,6 +11,7 @@ from league.leaguecontainer import LeagueContainer
 from envvars import Env
 import webserver
 import webserver.web
+import http.client, urllib
 
 @inject
 def main(dbservice: DbService = Provide[DbContainer.service], league_service: LeagueService = Provide[LeagueContainer.service]):
@@ -23,6 +24,16 @@ def main(dbservice: DbService = Provide[DbContainer.service], league_service: Le
         print(league_service.get_game(john))
         # print(league_service.is_in_game(john))
         # print(league_service.get_valid_game(john, [john]))
+
+def notify_pushover(msg: str):
+    conn = http.client.HTTPSConnection("api.pushover.net:443")
+    conn.request("POST", "/1/messages.json",
+    urllib.parse.urlencode({
+        "token": Env.pushover_token,
+        "user": Env.pushover_user,
+        "message": msg,
+    }), { "Content-type": "application/x-www-form-urlencoded" })
+    conn.getresponse()
 
 container = LeagueContainer()
 container.init_resources()
@@ -40,7 +51,13 @@ random.seed()
 web_server_thread = Thread(target = webserver.web.start)
 web_server_thread.start()
 
+notify_pushover("starting bot")
+retry_count = 0
+retry_max = 10
+while retry_count < retry_max:
+    monitor = discord.bot_league_monitor.run()
+    retry_count = retry_count + 1
+    time.sleep(retry_count*retry_count)
+    notify_pushover(f"failed, retry {retry_count}")
 
-monitor = discord.bot_league_monitor.run()
-
-web_server_thread.join()
+notify_pushover(f"failed, exit")

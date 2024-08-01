@@ -1,6 +1,7 @@
 from datetime import datetime
 import dis
 from functools import partial, wraps
+import math
 import random
 from sys import prefix
 from threading import Thread
@@ -127,8 +128,9 @@ class DiscordMonitorClient(commands.Bot):
             with self.db.Session() as session: 
                 guilds = session.query(Guild).all()
                 for guild in guilds:
-                    if guild.brancoins < 80:
-                        guild.brancoins += 22
+                    jackpot_soft_cap = math.ceil(ViewJackpot.upper_class_wealth(session, str(guild.guild_id)) * 0.1)
+                    if guild.brancoins < jackpot_soft_cap:
+                        guild.brancoins += math.ceil(jackpot_soft_cap * 0.08)
                         session.add(guild)
                 session.commit()
         except Exception as e: 

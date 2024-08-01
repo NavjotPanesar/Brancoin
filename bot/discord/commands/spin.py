@@ -4,11 +4,13 @@ from ast import Tuple
 from asyncio import AbstractEventLoop
 import asyncio
 import itertools
+import math
 from typing import List
 from discord import Message
 import discord
 import discord.ext
 import discord.ext.commands
+from discord.commands.jackpot import ViewJackpot
 from discord.CardBonusType import CardBonusType
 from models.dbcontainer import DbService
 from models.models import Card, CardBonus, Guild, OwnedCard, User
@@ -22,8 +24,8 @@ from reactivex.scheduler import ThreadPoolScheduler
 
 class Spin(BaseCommand):
     cost = 2
-    wins = [(1/500, 50), (1/50, 20), (1/18, 10), (1/6, 6), (1/4, 3), (3/8, 2)]
-    jackpot_chance = 1/200
+    wins = [(1/500, 50), (1/50, 20), (1/18, 10), (1/6, 6), (1/4, 3), (5/8, 2)]
+    jackpot_chance = None
     prefix = "bran spin"
     usage = prefix
     freebie_chance = 1/100
@@ -61,9 +63,9 @@ class Spin(BaseCommand):
 
     def num_rolls_to_do(self, dbservice: DbService, author_id: int):
         with dbservice.Session() as session: 
-            has_bonus_roll = session.query(CardBonus).filter(CardBonus.bonus_type == CardBonusType.SPIN_2X.value).join(Card).join(OwnedCard).join(User).filter(User.user_id == str(author_id)).count() > 0
-            if has_bonus_roll:
-                return 2
+            bonus_rolls = session.query(CardBonus).distinct(CardBonus.id).filter(CardBonus.bonus_type == CardBonusType.SPIN_2X.value).join(Card).join(OwnedCard).join(User).filter(User.user_id == str(author_id)).count()
+            if bonus_rolls > 0:
+                return 1 + bonus_rolls
         return 1
 
     async def process(self, ctx, message: Message, dbservice: DbService):
@@ -101,7 +103,9 @@ class Spin(BaseCommand):
                 if spin_val < win[0]:
                     win_val = win[1]
                     break
-            won_jackpot = spin_val < self.jackpot_chance
+            
+            jackpot_chance_dynamic = max(200, math.ceil(ViewJackpot.upper_class_wealth(session, str(guild.guild_id)) * 0.1))
+            won_jackpot = spin_val < (1/jackpot_chance_dynamic)
 
             jackpot_value = guild.brancoins
             if won_jackpot:
