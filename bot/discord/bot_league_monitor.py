@@ -178,6 +178,10 @@ class DiscordMonitorClient(commands.Bot):
                 output = ""
                 match = session.query(Match).filter(Match.match_id == match_id).first()
                 we_win = results['extra_data']['our_team_won']
+                if we_win:
+                    output += "The boys were victorious!"
+                else:
+                    output += "These idiots lost."
                 for vote in match.votes:
                     print(vote)
                     guy = await self.fetch_user(vote.voter.user_id)
