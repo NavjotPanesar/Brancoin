@@ -35,7 +35,29 @@ services:
       - db
     # volumes:
     #   - ./bot/:/usr/src/app
-    
+
+  migrate:
+    build: ./bot/
+    entrypoint: ["alembic"]
+    environment:
+      - POSTGRES_HOST=db
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=dev
+      - POSTGRES_DB=brancoin
+      # Dummy values - envvars.py loads these at import time
+      - DISCORD_TOKEN=unused
+      - DISCORD_TOKEN_DEBUG=unused
+      - IS_DEBUG=true
+      - LEAGUE_TOKEN=unused
+      - WEB_PORT=8081
+      - PUSHOVER_TOKEN=unused
+      - PUSHOVER_USER=unused
+    volumes:
+      - ./bot/alembic:/usr/src/app/alembic
+      - ./bot/models:/usr/src/app/models
+    depends_on:
+      - db
+
 volumes:
   pgdata:
      

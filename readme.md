@@ -4,6 +4,5 @@
 - `docker-compose run bot alembic head upgrade` to generate the DB schema
 
 # Migrations
-- Shell into bot container first
-- Create: `alembic revision --autogenerate -m "added tag to league user"`
-- Run: `alembic upgrade head`
+- Create: `docker-compose run migrate revision --autogenerate -m "added tag to league user"`
+- Run: `docker-compose run migrate upgrade head`

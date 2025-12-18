@@ -94,6 +94,19 @@ class DiscordMonitorClient(commands.Bot):
                 OpenPack(), ViewCard(), SelectCard(), DeleteCard(), DeleteDupeCards(), AdminAddBooster()]
 
     async def on_ready(self):
+        with self.db.Session() as session:
+            all_league_users = session.query(LeagueUser).all()
+            for league_user in all_league_users:
+                if league_user.puuid is None and league_user.voteable is True and league_user.trackable is True:
+                    try:
+                        league_user.puuid = self.league.get_puuid(league_user)
+                        print(f"backfilling {league_user.summoner_name} with puuid: {league_user.puuid}")
+                    except Exception as e:
+                        league_user.trackable = False
+                        league_user.voteable = False
+                        print(f"couldn't find user {league_user.summoner_name}")
+            session.commit()
+
         for guild in self.guilds:
             self.create_guild(guild)
             self.populate_users(guild)
@@ -110,7 +123,6 @@ class DiscordMonitorClient(commands.Bot):
                 else:
                     print("user already exists")
             session.commit()
-
 
     def create_guild(self, guild: discord.Guild):
         with self.db.Session() as session:

@@ -33,6 +33,7 @@ class LeagueUser(Base):
     tag: Mapped[str]
     trackable: Mapped[bool]
     voteable: Mapped[bool]
+    puuid: Mapped[str] = mapped_column(nullable=True)
     
     discord_user_id = mapped_column(Integer, ForeignKey("user_account.id"))
     discord_user: Mapped["User"] = relationship(back_populates="league_users")
