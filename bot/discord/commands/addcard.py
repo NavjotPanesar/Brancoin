@@ -41,8 +41,9 @@ class AdminAddCard(BaseCommand):
             with dbservice.Session() as session: 
                 session.add(card)
                 session.commit()
-                await message.reply("done")
+                await message.reply(f"done {card.id}")
         else:
             with dbservice.Session() as session: 
                 card.image = session.query(Image).filter(Image.label == card.image_label).first()
             await message.reply(file=discord.File(DrawUtils.card_to_byte_image(card), filename="preview.png"))
+            

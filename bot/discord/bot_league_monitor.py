@@ -35,6 +35,7 @@ from discord.commands.coins import Coins
 from discord.commands.spin import Spin
 from discord.commands.gift import Gift
 from discord.commands.coin import Coin
+from discord.commands.addbooster import AdminAddBooster
 from models.models import Guild, LeagueUser, MatchPlayer, User, Match
 from discord.commands.discover import Discover
 from league.leaguecontainer import LeagueContainer
@@ -90,7 +91,7 @@ class DiscordMonitorClient(commands.Bot):
                 Coin(), Gift(), Coins(), ViewJackpot(), Beg(), Spin(loop=self.loop, dbservice=self.db, ctx=self.get_context),
                 ViewMatches(), AddVote(), 
                 Inventory(), ViewShop(), Buy(),
-                OpenPack(), ViewCard(), SelectCard(), DeleteCard(), DeleteDupeCards()]
+                OpenPack(), ViewCard(), SelectCard(), DeleteCard(), DeleteDupeCards(), AdminAddBooster()]
 
     async def on_ready(self):
         for guild in self.guilds:
