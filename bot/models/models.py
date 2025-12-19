@@ -46,7 +46,8 @@ class Match(Base):
     __tablename__ = "match"
     match_id: Mapped[str] = mapped_column(primary_key=true)
     finished: Mapped[bool] = mapped_column(server_default="False")
-    start_time: Mapped[datetime.datetime] 
+    start_time: Mapped[datetime.datetime]
+    match_type: Mapped[str] = mapped_column(nullable=True)
 
     match_players: Mapped[List["MatchPlayer"]] = relationship(back_populates="match")
     votes: Mapped[List["Votes"]] = relationship()

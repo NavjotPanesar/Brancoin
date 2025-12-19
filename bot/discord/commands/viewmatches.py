@@ -31,7 +31,7 @@ class ViewMatches(BaseCommand):
     @staticmethod
     async def generate_embed_for_match(match: Match, bot: Bot):
         embedVar = discord.Embed(title=f"id: {match.match_id}", description="", color=0xccccff)
-        embedVar.set_author(name="ARAM in progress", icon_url="https://i.imgur.com/RXKFjqo.png")
+        embedVar.set_author(name=f"{match.match_type} in progress", icon_url="https://i.imgur.com/RXKFjqo.png")
         
         embedVar.add_field(name="\u200b", value="", inline=False)
         embedVar.add_field(name="Players: ", value="", inline=False)

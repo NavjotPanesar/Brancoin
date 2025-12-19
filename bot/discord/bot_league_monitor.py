@@ -231,6 +231,7 @@ class DiscordMonitorClient(commands.Bot):
                     match = Match()
                     match.finished = False
                     match.match_id = valid_game['spectator_data']['gameId']
+                    match.match_type = valid_game['match_type']
                     match.start_time = datetime.now()
                     for participant in valid_game['valid_participants']:
                         match_player = MatchPlayer()
