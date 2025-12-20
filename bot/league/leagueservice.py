@@ -35,6 +35,10 @@ class LeagueService():
             return None
         print ("got active game for " )
 
+        if spectator_data['gameMode'] != "ARAM" and spectator_data['gameMode'] != "CLASSIC" and spectator_data['gameMode'] != "URF":
+            print("Not a valid game mode")
+            return None
+
         user_participant = list(map(lambda user: {'league_user': user, 'participant_json': self.find_participant(user, spectator_data['participants'])}, trackable_users))
         valid_participants = list(filter(lambda x: x['participant_json'] is not None, user_participant))
 
