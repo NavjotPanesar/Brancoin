@@ -58,6 +58,26 @@ services:
     depends_on:
       - db
 
+  test:
+    build: ./bot/
+    entrypoint: ["python", "-m", "pytest", "-v"]
+    environment:
+      - POSTGRES_HOST=localhost
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_USER=test
+      - POSTGRES_DB=brancoin_test
+      - DISCORD_TOKEN=unused
+      - DISCORD_TOKEN_DEBUG=unused
+      - IS_DEBUG=true
+      - LEAGUE_TOKEN=unused
+      - WEB_PORT=8080
+      - PUSHOVER_TOKEN=unused
+      - PUSHOVER_USER=unused
+    volumes:
+      - ./bot:/usr/src/app
+    profiles:
+      - test
+
 volumes:
   pgdata:
      
