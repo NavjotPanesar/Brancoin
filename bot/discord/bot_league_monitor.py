@@ -8,6 +8,7 @@ from discord.commands.viewcard import ViewCard
 from discord.commands.viewpackcards import ViewPackCards
 from discord.commands.openpack import OpenPack
 from discord.commands.addcard import AdminAddCard
+from discord.commands.addcard import AdminSync
 from discord.commands.addimage import AdminAddImage
 from discord.commands.selectcard import SelectCard
 from discord.commands.inventory import Inventory
@@ -48,17 +49,6 @@ class DiscordMonitorClient(commands.Bot):
         if message.author == self.user:
             return
 
-        # Admin command to sync slash commands to current guild
-        if message.content == "bran sync":
-            if message.author.guild_permissions.administrator:
-                guild = discord.Object(id=message.guild.id)
-                self.tree.copy_global_to(guild=guild)
-                synced = await self.tree.sync(guild=guild)
-                await message.reply(f"Synced {len(synced)} slash commands to this guild.")
-            else:
-                await message.reply("Admin only.")
-            return
-
         for command in self.commands:
             try:
                 await command.process(self.get_context, message, self.db)
@@ -95,7 +85,7 @@ class DiscordMonitorClient(commands.Bot):
 
         # Legacy prefix commands (to be migrated to slash commands)
         self.commands = [
-            AdminAddLeague(), AdminAddBroadcast(), ViewPackCards(), AdminAddImage(), AdminAddCard(),
+            AdminAddLeague(), AdminAddBroadcast(), ViewPackCards(), AdminAddImage(), AdminAddCard(), AdminSync(),
             Discover(),
             ViewJackpot(), Spin(loop=self.loop, dbservice=self.db, ctx=self.get_context),
             ViewMatches(), AddVote(),
