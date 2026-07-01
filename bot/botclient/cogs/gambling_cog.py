@@ -5,10 +5,10 @@ from discord import app_commands
 from discord.ext import commands
 from models.dbcontainer import DbService
 from models.models import CardBonus, Card, OwnedCard, Guild, Match, User, Votes
-from discord.VoteType import VoteType
-from discord.CardBonusType import CardBonusType
-from discord.utils.economy_utils import upper_class_wealth
-from discord.utils.match_utils import generate_embed_for_match
+from botclient.VoteType import VoteType
+from botclient.CardBonusType import CardBonusType
+from botclient.helpers.economy_utils import upper_class_wealth
+from botclient.helpers.match_utils import generate_embed_for_match
 from .base_cog import BaseCog
 
 

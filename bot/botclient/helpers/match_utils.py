@@ -1,7 +1,7 @@
 import discord
 from discord.ext.commands import Bot
 from models.models import Match
-from discord.VoteType import VoteType
+from botclient.VoteType import VoteType
 
 
 async def generate_embed_for_match(match: Match, bot: Bot) -> discord.Embed:

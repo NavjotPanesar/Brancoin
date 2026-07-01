@@ -4,8 +4,8 @@ import discord
 from discord.ext import commands, tasks
 from models.dbcontainer import DbService
 from models.models import Guild, LeagueUser, Match, MatchPlayer
-from discord.VoteType import VoteType
-from discord.utils.match_utils import generate_embed_for_match
+from botclient.VoteType import VoteType
+from botclient.helpers.match_utils import generate_embed_for_match
 from league.leagueservice import LeagueService
 from .base_cog import BaseCog
 

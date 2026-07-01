@@ -7,8 +7,8 @@ from discord.ext import commands
 from sqlalchemy import text
 from models.dbcontainer import DbService
 from models.models import Card, OwnedCard, User
-from discord.drawutils import DrawUtils
-from discord.utils.card_utils import find_card_by_text
+from botclient.drawutils import DrawUtils
+from botclient.helpers.card_utils import find_card_by_text
 from .base_cog import BaseCog
 
 

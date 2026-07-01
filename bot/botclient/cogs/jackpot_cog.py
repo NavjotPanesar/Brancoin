@@ -3,7 +3,7 @@ import traceback
 from discord.ext import commands, tasks
 from models.dbcontainer import DbService
 from models.models import Guild
-from discord.utils.economy_utils import upper_class_wealth
+from botclient.helpers.economy_utils import upper_class_wealth
 from .base_cog import BaseCog
 
 

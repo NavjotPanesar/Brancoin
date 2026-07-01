@@ -8,7 +8,7 @@ from models.models import (
     BoosterCard, BoosterPack, BoosterSegment, Card, Guild,
     Image, LeagueUser, User
 )
-from discord.drawutils import DrawUtils
+from botclient.drawutils import DrawUtils
 from league.leagueservice import LeagueService
 from .base_cog import BaseCog
 

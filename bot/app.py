@@ -2,7 +2,7 @@ from datetime import datetime, time
 import random
 from threading import Thread
 from sqlalchemy import create_engine, select
-import discord.bot_league_monitor
+import botclient.bot_league_monitor
 from models.dbcontainer import DbContainer, DbService
 from models.models import LeagueUser, Match, MatchPlayer
 from league.leagueservice import LeagueService
@@ -37,12 +37,12 @@ def notify_pushover(msg: str):
 
 container = LeagueContainer()
 container.init_resources()
-container.wire(modules=[__name__,  discord.bot_league_monitor])
+container.wire(modules=[__name__,  botclient.bot_league_monitor])
 
 
 container2 = DbContainer()
 container2.init_resources()
-container2.wire(modules=[__name__, webserver.web, discord.bot_league_monitor])
+container2.wire(modules=[__name__, webserver.web, botclient.bot_league_monitor])
 
 random.seed()
 
@@ -55,7 +55,7 @@ notify_pushover("starting bot")
 retry_count = 0
 retry_max = 10
 while retry_count < retry_max:
-    monitor = discord.bot_league_monitor.run()
+    monitor = botclient.bot_league_monitor.run()
     retry_count = retry_count + 1
     time.sleep(retry_count*retry_count)
     notify_pushover(f"failed, retry {retry_count}")

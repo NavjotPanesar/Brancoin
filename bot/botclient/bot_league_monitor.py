@@ -6,7 +6,7 @@ from models.dbcontainer import DbContainer, DbService
 from league.leagueservice import LeagueService
 from league.leaguecontainer import LeagueContainer
 from envvars import Env
-from discord.cogs import (
+from botclient.cogs import (
     EconomyCog,
     GamblingCog,
     CardsCog,

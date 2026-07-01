@@ -9,7 +9,7 @@ from PIL import Image, ImageFont, ImageDraw
 from sqlalchemy import func
 from models.dbcontainer import DbService
 from models.models import BoosterCard, BoosterPack, Card, OwnedCard, Shop, User
-from discord.drawutils import DrawUtils
+from botclient.drawutils import DrawUtils
 from .base_cog import BaseCog
 
 

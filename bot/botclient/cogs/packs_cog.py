@@ -7,7 +7,7 @@ from discord.ext import commands
 import random
 from models.dbcontainer import DbService
 from models.models import BoosterCard, BoosterPack, BoosterSegment, Card, OwnedCard, User
-from discord.drawutils import DrawUtils
+from botclient.drawutils import DrawUtils
 from .base_cog import BaseCog
 
 
