@@ -35,7 +35,8 @@ class LeagueService():
             return None
         print ("got active game for " )
 
-        if spectator_data['gameMode'] != "ARAM" and spectator_data['gameMode'] != "CLASSIC" and spectator_data['gameMode'] != "URF":
+        valid_game_modes = ["ARAM", "CLASSIC", "URF", "CHERRY"]
+        if spectator_data['gameMode'] not in valid_game_modes:
             print("Not a valid game mode")
             return None
 
