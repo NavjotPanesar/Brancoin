@@ -82,11 +82,14 @@ class LinkCog(BaseCog):
                 )
                 return
 
-            # 2) Block if this account is already *verified* to someone (ignore
-            #    unverified/pending rows so a stale claim can't lock others out).
-            verified_owner = session.query(LeagueUser).filter(
+            # 2) Block if this account is already *verified* to someone in THIS
+            #    guild (links are guild-scoped, so the same account may be linked
+            #    independently in other guilds). Ignore unverified/pending rows so
+            #    a stale claim can't lock others out.
+            verified_owner = session.query(LeagueUser).join(User).filter(
                 LeagueUser.puuid == puuid,
-                LeagueUser.verified == True
+                LeagueUser.verified == True,
+                User.guild_id == str(interaction.guild.id)
             ).first()
             if verified_owner:
                 if verified_owner.discord_user_id == user_account.id:
