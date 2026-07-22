@@ -1,7 +1,7 @@
 import datetime
 from typing import List
 from typing import Optional
-from sqlalchemy import BLOB, Float, ForeignKey, ForeignKeyConstraint, Integer, LargeBinary, PrimaryKeyConstraint, UniqueConstraint, null, true
+from sqlalchemy import BLOB, Float, ForeignKey, ForeignKeyConstraint, Index, Integer, LargeBinary, PrimaryKeyConstraint, UniqueConstraint, null, text, true
 from sqlalchemy import String
 import sqlalchemy
 from sqlalchemy.orm import Mapped
@@ -34,10 +34,25 @@ class LeagueUser(Base):
     trackable: Mapped[bool]
     voteable: Mapped[bool]
     puuid: Mapped[str] = mapped_column(nullable=True)
-    
+    # Ownership verification: unverified links hold a challenge icon id until the
+    # user proves control of the account by setting that profile icon in-game.
+    verified: Mapped[bool] = mapped_column(server_default="False")
+    verification_icon_id: Mapped[int] = mapped_column(nullable=True)
+
     discord_user_id = mapped_column(Integer, ForeignKey("user_account.id"))
     discord_user: Mapped["User"] = relationship(back_populates="league_users")
     # todo: make this unique by summoner_name, tag so we don't have multiple discord_users possible for a league_user
+
+    __table_args__ = (
+        # At most one *verified* owner per account. Partial index so multiple
+        # pending (unverified) claims on the same puuid remain allowed.
+        Index(
+            "uq_league_user_verified_puuid",
+            "puuid",
+            unique=True,
+            postgresql_where=text("verified"),
+        ),
+    )
 
     def __repr__(self) -> str:
         return f"tag(id={self.tag!r}, summoner_name={self.summoner_name!r}, trackable={self.trackable!r}, voteable={self.voteable!r})"
@@ -158,7 +173,7 @@ class Shop(Base):
     id = mapped_column(Integer, primary_key=True, autoincrement=True, unique=True)
     card_id: Mapped[Integer] = mapped_column(ForeignKey("cards.id"))
     card: Mapped["Card"] = relationship()
-    date_added: Mapped[datetime.date] = mapped_column(server_default=str(datetime.date.today()))
+    date_added: Mapped[datetime.date] = mapped_column(server_default=sqlalchemy.func.current_date())
 
 class BoosterPack(Base):
     __tablename__ = "booster_pack"

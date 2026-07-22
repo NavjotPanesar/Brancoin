@@ -15,6 +15,7 @@ from botclient.cogs import (
     AdminCog,
     GameMonitorCog,
     JackpotCog,
+    LinkCog,
 )
 
 
@@ -41,6 +42,7 @@ class DiscordMonitorClient(commands.Bot):
         await self.add_cog(AdminCog(self, self.db, self.league))
         await self.add_cog(GameMonitorCog(self, self.db, self.league))
         await self.add_cog(JackpotCog(self, self.db))
+        await self.add_cog(LinkCog(self, self.db, self.league))
 
         # Sync slash commands to Discord
         # For development, you can sync to a specific guild for instant updates:

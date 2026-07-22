@@ -7,6 +7,7 @@ from .packs_cog import PacksCog
 from .admin_cog import AdminCog
 from .game_monitor_cog import GameMonitorCog
 from .jackpot_cog import JackpotCog
+from .link_cog import LinkCog
 
 __all__ = [
     'BaseCog',
@@ -18,4 +19,5 @@ __all__ = [
     'AdminCog',
     'GameMonitorCog',
     'JackpotCog',
+    'LinkCog',
 ]

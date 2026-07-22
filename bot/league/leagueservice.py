@@ -21,6 +21,10 @@ class LeagueService():
     def get_puuid(self, league_user: LeagueUser):
         return self.api_riot_watcher.account.by_riot_id(region=self.region_riot_api, game_name=league_user.summoner_name, tag_line=league_user.tag)['puuid']
 
+    def get_profile_icon_id(self, puuid: str) -> int:
+        """Return the current profile icon id for a summoner (used for ownership verification)."""
+        return self.api_lol_watcher.summoner.by_puuid(self.region_lol, puuid)['profileIconId']
+
     def get_matches(self, league_user: LeagueUser):
         return self.api_match.matchlist_by_puuid(self.region_lol, league_user.puuid)
 
