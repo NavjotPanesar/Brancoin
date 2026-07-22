@@ -1,4 +1,5 @@
 import random
+from datetime import datetime, timedelta
 
 import discord
 from discord import app_commands
@@ -13,6 +14,10 @@ from .base_cog import BaseCog
 # select. We challenge users to switch to one of these to prove account ownership.
 STOCK_PROFILE_ICON_IDS = list(range(0, 29))
 
+# How long a pending verification challenge stays valid before it expires and the
+# user has to re-run /linkleague to get a fresh one.
+VERIFICATION_TTL = timedelta(minutes=30)
+
 # Data Dragon patch used only to render the target icon image. Any valid version
 # works for these stock icons; bump it if the CDN ever drops an old patch.
 DDRAGON_VERSION = "14.14.1"
@@ -26,7 +31,7 @@ class VerifyLinkView(discord.ui.View):
     """Ephemeral 'Verify' button attached to a pending link challenge."""
 
     def __init__(self, cog: "LinkCog", league_user_id: int, owner_user_id: int):
-        super().__init__(timeout=300)
+        super().__init__(timeout=VERIFICATION_TTL.total_seconds())
         self.cog = cog
         self.league_user_id = league_user_id
         self.owner_user_id = owner_user_id  # Discord id allowed to press Verify
@@ -96,14 +101,20 @@ class LinkCog(BaseCog):
             except Exception:
                 current_icon = None
 
-            # 4) Reuse an existing pending challenge for this user+account so the
+            # 4) Reuse a still-valid pending challenge for this user+account so the
             #    target icon stays STABLE across re-runs / button timeouts — a user
-            #    mid-icon-change is never told to switch to a different icon.
+            #    mid-icon-change is never told to switch to a different icon. An
+            #    expired challenge is discarded and replaced with a fresh one.
             pending = session.query(LeagueUser).filter(
                 LeagueUser.puuid == puuid,
                 LeagueUser.discord_user_id == user_account.id,
                 LeagueUser.verified == False
             ).first()
+
+            if pending is not None and self._is_expired(pending):
+                session.delete(pending)
+                session.flush()
+                pending = None
 
             if pending is not None:
                 target_icon = pending.verification_icon_id
@@ -121,18 +132,12 @@ class LinkCog(BaseCog):
                 pending.voteable = False
                 pending.verified = False
                 pending.verification_icon_id = target_icon
+                pending.verification_started_at = datetime.now()
                 session.add(pending)
 
             # 5) If they've already set the challenge icon (e.g. the button timed
             #    out while they changed it), finish the link now — no second click.
             if current_icon is not None and current_icon == target_icon:
-                if self._other_verified_owner(session, pending):
-                    session.delete(pending)
-                    session.commit()
-                    await interaction.followup.send(
-                        f"**{riot_id}#{tag}** was just linked by someone else.", ephemeral=True
-                    )
-                    return
                 pending.verified = True
                 pending.trackable = True
                 pending.voteable = True
@@ -160,8 +165,9 @@ class LinkCog(BaseCog):
         )
         embed.set_thumbnail(url=_icon_image_url(target_icon))
         embed.set_footer(
-            text="The Verify button expires in 5 minutes — if it does, just re-run /linkleague "
-                 "(you'll get the same icon) and it'll finish once your icon matches."
+            text="This challenge expires in 30 minutes — if it does, just re-run /linkleague "
+                 "for a fresh one. While it's valid you'll get the same icon, and it finishes "
+                 "as soon as your icon matches."
         )
 
         view = VerifyLinkView(self, pending_id, interaction.user.id)
@@ -176,12 +182,13 @@ class LinkCog(BaseCog):
                 await interaction.followup.send("This verification is no longer active.", ephemeral=True)
                 return
 
-            # Guard against a race: someone else verified this account in the meantime.
-            if self._other_verified_owner(session, pending):
+            # Expired challenges can't be verified — the user must start over.
+            if self._is_expired(pending):
                 session.delete(pending)
                 session.commit()
                 await interaction.followup.send(
-                    f"**{self._label(pending)}** was just linked by someone else.", ephemeral=True
+                    "This verification expired. Run `/linkleague` again to get a fresh one.",
+                    ephemeral=True
                 )
                 return
 
@@ -277,13 +284,12 @@ class LinkCog(BaseCog):
         ][:25]
 
     @staticmethod
-    def _other_verified_owner(session, pending: LeagueUser) -> bool:
-        """True if a *different* row has already verified this same account (race guard)."""
-        return session.query(LeagueUser).filter(
-            LeagueUser.puuid == pending.puuid,
-            LeagueUser.verified == True,
-            LeagueUser.id != pending.id
-        ).first() is not None
+    def _is_expired(pending: LeagueUser) -> bool:
+        """True if a pending challenge has passed its validity window."""
+        started = pending.verification_started_at
+        if started is None:
+            return True
+        return datetime.now() - started > VERIFICATION_TTL
 
     @staticmethod
     def _label(league_user: LeagueUser) -> str:
